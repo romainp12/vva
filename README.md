@@ -4,12 +4,12 @@ Ce projet est une application web pour la gestion des animations et activités d
 
 ## 📋 Table des matières
 
-- [Présentation du projet](#présentation-du-projet)
-- [Fonctionnalités](#fonctionnalités)
-- [Structure des fichiers](#structure-des-fichiers)
-- [Installation](#installation)
-- [Profils utilisateurs](#profils-utilisateurs)
-- [Technologies utilisées](#technologies-utilisées)
+- [Présentation du projet](#-présentation-du-projet)
+- [Fonctionnalités](#-fonctionnalités)
+- [Structure des fichiers](#-structure-des-fichiers)
+- [Installation](#-installation)
+- [Profils utilisateurs](#-profils-utilisateurs)
+- [Technologies utilisées](#️-technologies-utilisées)
 
 ## 🎯 Présentation du projet
 
