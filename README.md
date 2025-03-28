@@ -13,7 +13,7 @@ Ce projet est une application web pour la gestion des animations et activités d
 
 ## 🎯 Présentation du projet
 
-Ce projet a été développé dans le cadre de l'épreuve E5 du BTS SIO SLAM. Il s'agit d'une application de gestion des animations et activités pour un village vacances qui permet aux vacanciers de consulter et de s'inscrire aux activités proposées, et aux encadrants de gérer ces activités.
+Ce projet a été développé dans le cadre de l'épreuve E6 du BTS SIO SLAM. Il s'agit d'une application de gestion des animations et activités pour un village vacances qui permet aux vacanciers de consulter et de s'inscrire aux activités proposées, et aux encadrants de gérer ces activités.
 
 L'application respecte les cas d'utilisation spécifiés dans le cahier des charges.
 
