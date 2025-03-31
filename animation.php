@@ -336,158 +336,158 @@ if (isset($_SESSION['user']) && $_SESSION['type'] === 'VA') {
         </div>
     <?php else: ?>
         <div class="activity-list">
-            <?php foreach ($activites as $activite): 
-                // Vérifier si l'utilisateur est déjà inscrit
-                $isInscribed = false;
-                if (isset($_SESSION['user'])) {
-                    $stmtCheckInscription = $pdo->prepare("
-                        SELECT 1 FROM INSCRIPTION
-                        WHERE USER = :userId AND CODEANIM = :codeAnim AND DATEACT = :dateAct AND DATEANNULE IS NULL
-                    ");
-                    $stmtCheckInscription->execute([
-                        'userId' => $_SESSION['user'],
-                        'codeAnim' => $activite['CODEANIM'],
-                        'dateAct' => $activite['DATEACT']
-                    ]);
-                    $isInscribed = $stmtCheckInscription->fetchColumn();
-                }
+    <?php foreach ($activites as $activite): 
+        // Vérifier si l'utilisateur est déjà inscrit
+        $isInscribed = false;
+        if (isset($_SESSION['user'])) {
+            $stmtCheckInscription = $pdo->prepare("
+                SELECT 1 FROM INSCRIPTION
+                WHERE USER = :userId AND CODEANIM = :codeAnim AND DATEACT = :dateAct AND DATEANNULE IS NULL
+            ");
+            $stmtCheckInscription->execute([
+                'userId' => $_SESSION['user'],
+                'codeAnim' => $activite['CODEANIM'],
+                'dateAct' => $activite['DATEACT']
+            ]);
+            $isInscribed = $stmtCheckInscription->fetchColumn();
+        }
+        
+        // Calculer le nombre de places disponibles pour cette session spécifique
+        $stmtCountInscrits = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM INSCRIPTION 
+            WHERE CODEANIM = :codeAnim 
+            AND DATEACT = :dateAct 
+            AND DATEANNULE IS NULL
+        ");
+        $stmtCountInscrits->execute([
+            'codeAnim' => $activite['CODEANIM'],
+            'dateAct' => $activite['DATEACT']
+        ]);
+        $nbInscrits = $stmtCountInscrits->fetchColumn();
+        $placesDisponibles = $animation['NBREPLACEANIM'] - $nbInscrits;
+        
+        // Vérifier si la date de l'activité est dans la période de séjour
+        $isWithinStayPeriod = true;
+        $isAgeOk = true;
+        if ($userInfo && $_SESSION['type'] === 'VA') {
+            // Vérifier la période de séjour
+            if (!empty($userInfo['DATEDEBSEJOUR']) && !empty($userInfo['DATEFINSEJOUR'])) {
+                $isWithinStayPeriod = ($activite['DATEACT'] >= $userInfo['DATEDEBSEJOUR'] && 
+                                      $activite['DATEACT'] <= $userInfo['DATEFINSEJOUR']);
+            }
+            
+            // Vérifier l'âge
+            if (!empty($userInfo['DATENAISCOMPTE']) && isset($animation['LIMITEAGE'])) {
+                $dateNaissance = new DateTime($userInfo['DATENAISCOMPTE']);
+                $dateActivite = new DateTime($activite['DATEACT']);
+                $age = $dateNaissance->diff($dateActivite)->y;
                 
-                // Calculer le nombre de places disponibles pour cette session spécifique
-                $stmtCountInscrits = $pdo->prepare("
-                    SELECT COUNT(*) 
-                    FROM INSCRIPTION 
-                    WHERE CODEANIM = :codeAnim 
-                    AND DATEACT = :dateAct 
-                    AND DATEANNULE IS NULL
-                ");
-                $stmtCountInscrits->execute([
-                    'codeAnim' => $activite['CODEANIM'],
-                    'dateAct' => $activite['DATEACT']
-                ]);
-                $nbInscrits = $stmtCountInscrits->fetchColumn();
-                $placesDisponibles = $animation['NBREPLACEANIM'] - $nbInscrits;
-                
-                // Vérifier si la date de l'activité est dans la période de séjour
-                $isWithinStayPeriod = true;
-                $isAgeOk = true;
-                if ($userInfo && $_SESSION['type'] === 'VA') {
-                    // Vérifier la période de séjour
-                    if (!empty($userInfo['DATEDEBSEJOUR']) && !empty($userInfo['DATEFINSEJOUR'])) {
-                        $isWithinStayPeriod = ($activite['DATEACT'] >= $userInfo['DATEDEBSEJOUR'] && 
-                                              $activite['DATEACT'] <= $userInfo['DATEFINSEJOUR']);
-                    }
-                    
-                    // Vérifier l'âge
-                    if (!empty($userInfo['DATENAISCOMPTE']) && isset($animation['LIMITEAGE'])) {
-                        $dateNaissance = new DateTime($userInfo['DATENAISCOMPTE']);
-                        $dateActivite = new DateTime($activite['DATEACT']);
-                        $age = $dateNaissance->diff($dateActivite)->y;
-                        
-                        $isAgeOk = ($age >= $animation['LIMITEAGE']);
-                    }
-                }
-            ?>
-                <div class="activity-item fade-in">
-                    <div class="activity-header d-flex justify-content-between align-items-center">
-                        <div>Session du <?= htmlspecialchars(date('d/m/Y', strtotime($activite['DATEACT']))) ?></div>
-                        <span class="badge <?= $activite['CODEETATACT'] === 'E1' ? 'badge-success' : 'badge-warning' ?>">
-                            <?= htmlspecialchars($activite['NOMETATACT']) ?>
-                        </span>
+                $isAgeOk = ($age >= $animation['LIMITEAGE']);
+            }
+        }
+    ?>
+        <div class="activity-item fade-in">
+            <div class="activity-header d-flex justify-content-between align-items-center">
+                <div>Session du <?= htmlspecialchars(date('d/m/Y', strtotime($activite['DATEACT']))) ?></div>
+                <span class="badge <?= $activite['CODEETATACT'] === 'E1' ? 'badge-success' : 'badge-warning' ?>">
+                    <?= htmlspecialchars($activite['NOMETATACT']) ?>
+                </span>
+            </div>
+            <div class="activity-body">
+                <div class="activity-info">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-clock"></i> Rendez-vous</div>
+                        <div class="info-value"><?= htmlspecialchars($activite['HRRDVACT']) ?></div>
                     </div>
-                    <div class="activity-body">
-                        <div class="activity-info">
-                            <div class="info-item">
-                                <div class="info-label"><i class="fas fa-clock"></i> Rendez-vous</div>
-                                <div class="info-value"><?= htmlspecialchars($activite['HRRDVACT']) ?></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="fas fa-play"></i> Début</div>
-                                <div class="info-value"><?= htmlspecialchars($activite['HRDEBUTACT']) ?></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="fas fa-stop"></i> Fin</div>
-                                <div class="info-value"><?= htmlspecialchars($activite['HRFINACT']) ?></div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="fas fa-euro-sign"></i> Prix</div>
-                                <div class="info-value"><?= htmlspecialchars($activite['PRIXACT']) ?> €</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="fas fa-users"></i> Places disponibles</div>
-                                <div class="info-value"><?= htmlspecialchars($placesDisponibles) ?> / <?= htmlspecialchars($animation['NBREPLACEANIM']) ?></div>
-                            </div>
-                        </div>
-                        
-                        <div class="activity-actions">
-                            <?php if (isset($_SESSION['user'])): ?>
-                                <?php if ($isInscribed): ?>
-                                    <form method="POST">
-                                        <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
-                                        <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
-                                        <button type="submit" name="desinscription" class="btn btn-danger">
-                                            <i class="fas fa-user-minus"></i> Se désinscrire
-                                        </button>
-                                    </form>
-                                <?php else: ?>
-                                    <?php if ($_SESSION['type'] === 'VA' && (!$isWithinStayPeriod || !$isAgeOk)): ?>
-                                        <?php if (!$isWithinStayPeriod): ?>
-                                            <div class="alert alert-warning">
-                                                <i class="fas fa-exclamation-triangle"></i> Cette session est en dehors de votre période de séjour.
-                                            </div>
-                                        <?php endif; ?>
-                                        <?php if (!$isAgeOk): ?>
-                                            <div class="alert alert-warning">
-                                                <i class="fas fa-exclamation-triangle"></i> Vous ne remplissez pas les conditions d'âge minimum.
-                                            </div>
-                                        <?php endif; ?>
-                                        <button class="btn btn-secondary" disabled>
-                                            <i class="fas fa-user-plus"></i> Inscription impossible
-                                        </button>
-                                    <?php elseif ($placesDisponibles <= 0): ?>
-                                        <div class="alert alert-warning">
-                                            <i class="fas fa-exclamation-triangle"></i> Cette session est complète.
-                                        </div>
-                                        <button class="btn btn-secondary" disabled>
-                                            <i class="fas fa-user-plus"></i> Session complète
-                                        </button>
-                                    <?php else: ?>
-                                        <form method="POST">
-                                            <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
-                                            <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
-                                            <button type="submit" name="inscription" class="btn btn-primary">
-                                                <i class="fas fa-user-plus"></i> S'inscrire
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                                
-                                <?php
-                                // Vérifier si l'utilisateur a un profil 'EN' ou 'AD' pour afficher les options d'administration
-                                if (isset($_SESSION['type']) && ($_SESSION['type'] === 'EN' || $_SESSION['type'] === 'AD')): ?>
-                                    <a href="/encadrant/voir_inscrits.php?codeAnim=<?= htmlspecialchars($codeAnim) ?>&dateAct=<?= htmlspecialchars($activite['DATEACT']) ?>" class="btn btn-secondary">
-                                        <i class="fas fa-users"></i> Voir les inscrits
-                                    </a>
-                                    <a href="/encadrant/modifier_activite.php?codeAnim=<?= htmlspecialchars($codeAnim) ?>&dateAct=<?= htmlspecialchars($activite['DATEACT']) ?>" class="btn btn-secondary">
-                                        <i class="fas fa-edit"></i> Modifier
-                                    </a>
-                                    <form method="POST" style="display:inline;">
-                                        <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
-                                        <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
-                                        <button type="submit" name="annuler" class="btn btn-danger">
-                                            <i class="fas fa-ban"></i> Annuler la session
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <div class="alert alert-info mb-0">
-                                    <i class="fas fa-info-circle"></i> Veuillez vous <a href="/login.php">connecter</a> pour vous inscrire.
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-play"></i> Début</div>
+                        <div class="info-value"><?= htmlspecialchars($activite['HRDEBUTACT']) ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-stop"></i> Fin</div>
+                        <div class="info-value"><?= htmlspecialchars($activite['HRFINACT']) ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-euro-sign"></i> Prix</div>
+                        <div class="info-value"><?= htmlspecialchars($activite['PRIXACT']) ?> €</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fas fa-users"></i> Places disponibles</div>
+                        <div class="info-value"><?= htmlspecialchars($placesDisponibles) ?> / <?= htmlspecialchars($animation['NBREPLACEANIM']) ?></div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+                
+                <div class="activity-actions" style="background:none; box-shadow:none; padding:0; margin:0; display:flex; flex-wrap:wrap; align-items:center; gap:5px;">
+                    <?php if (isset($_SESSION['user'])): ?>
+                        <?php if ($isInscribed): ?>
+                            <form method="POST" style="display:inline; background:none; box-shadow:none; padding:0; margin:0;">
+                                <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
+                                <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
+                                <button type="submit" name="desinscription" class="btn btn-danger">
+                                    <i class="fas fa-user-minus"></i> Se désinscrire
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <?php if ($_SESSION['type'] === 'VA' && (!$isWithinStayPeriod || !$isAgeOk)): ?>
+                                <?php if (!$isWithinStayPeriod): ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Cette session est en dehors de votre période de séjour.
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!$isAgeOk): ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Vous ne remplissez pas les conditions d'âge minimum.
+                                    </div>
+                                <?php endif; ?>
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-user-plus"></i> Inscription impossible
+                                </button>
+                            <?php elseif ($placesDisponibles <= 0): ?>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> Cette session est complète.
+                                </div>
+                                <button class="btn btn-secondary" disabled>
+                                    <i class="fas fa-user-plus"></i> Session complète
+                                </button>
+                            <?php else: ?>
+                                <form method="POST" style="display:inline; background:none; box-shadow:none; padding:0; margin:0;">
+                                    <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
+                                    <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
+                                    <button type="submit" name="inscription" class="btn btn-primary">
+                                        <i class="fas fa-user-plus"></i> S'inscrire
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        
+                        <?php
+                        // Vérifier si l'utilisateur a un profil 'EN' ou 'AD' pour afficher les options d'administration
+                        if (isset($_SESSION['type']) && ($_SESSION['type'] === 'EN' || $_SESSION['type'] === 'AD')): ?>
+                            <a href="/encadrant/voir_inscrits.php?codeAnim=<?= htmlspecialchars($codeAnim) ?>&dateAct=<?= htmlspecialchars($activite['DATEACT']) ?>" class="btn btn-secondary">
+                                <i class="fas fa-users"></i> Voir les inscrits
+                            </a>
+                            <a href="/encadrant/modifier_activite.php?codeAnim=<?= htmlspecialchars($codeAnim) ?>&dateAct=<?= htmlspecialchars($activite['DATEACT']) ?>" class="btn btn-secondary">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <form method="POST" style="display:inline; background:none; box-shadow:none; padding:0; margin:0;">
+                                <input type="hidden" name="codeAct" value="<?= htmlspecialchars($activite['CODEANIM']) ?>">
+                                <input type="hidden" name="dateAct" value="<?= htmlspecialchars($activite['DATEACT']) ?>">
+                                <button type="submit" name="annuler" class="btn btn-danger">
+                                    <i class="fas fa-ban"></i> Annuler la session
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle"></i> Veuillez vous <a href="/login.php">connecter</a> pour vous inscrire.
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
+    <?php endforeach; ?>
+</div>
     <?php endif; ?>
 </div>
 
