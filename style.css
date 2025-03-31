@@ -365,6 +365,45 @@ select {
   font-size: 1.125rem;
 }
 
+/* Style pour la zone des actions */
+.activity-actions .btn,
+.activity-actions a.btn,
+.activity-actions form .btn {
+    height: 40px;
+    padding: 8px 15px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px;
+}
+
+/* Faire en sorte que S'inscrire et Annuler aient la même largeur */
+.activity-actions form .btn-primary,
+.activity-actions form .btn-danger {
+    width: 160px; /* Ajustez selon vos besoins */
+}
+
+/* Faire en sorte que Modifier et Voir les inscrits aient la même largeur */
+.activity-actions a.btn-secondary {
+    width: 160px; /* Ajustez selon vos besoins */
+}
+
+/* Centrer tous les boutons */
+.activity-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Supprimer tous les backgrounds blancs */
+.activity-body > div:not(.activity-info) {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
 /* Messages d'alerte */
 .alert {
   padding: 1rem;
