@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    $stmt = $pdo->prepare("SELECT * FROM COMPTE WHERE USER = :username AND MDP = :password");
+    $stmt = $pdo->prepare("SELECT USER, TYPEPROFIL FROM COMPTE WHERE USER = :username AND MDP = :password");
     $stmt->execute(['username' => $username, 'password' => $password]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
