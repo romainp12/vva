@@ -18,10 +18,11 @@ $codeAnim = $_GET['codeAnim'];
 $dateAct = $_GET['dateAct'];
 
 // Récupération des informations de l'activité
-$sql = "SELECT a.*, an.NOMANIM, an.NBREPLACEANIM 
-         FROM ACTIVITE a 
-         JOIN ANIMATION an ON a.CODEANIM = an.CODEANIM 
-         WHERE a.CODEANIM = ? AND a.DATEACT = ?";
+$sql = "SELECT a.CODEANIM, a.DATEACT, a.CODEETATACT, a.PRIXACT, a.HRRDVACT, a.HRDEBUTACT, a.HRFINACT, a.NOMRESP, a.PRENOMRESP,
+               an.NOMANIM, an.NBREPLACEANIM
+        FROM ACTIVITE a 
+        JOIN ANIMATION an ON a.CODEANIM = an.CODEANIM 
+        WHERE a.CODEANIM = ? AND a.DATEACT = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$codeAnim, $dateAct]);
 $activite = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -114,7 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Recharger les données après la mise à jour
-    $stmt = $pdo->prepare($sql = "SELECT a.*, an.NOMANIM, an.NBREPLACEANIM FROM ACTIVITE a JOIN ANIMATION an ON a.CODEANIM = an.CODEANIM WHERE a.CODEANIM = ? AND a.DATEACT = ?");
+    $stmt = $pdo->prepare($sql = "SELECT a.CODEANIM, a.DATEACT, a.CODEETATACT, a.PRIXACT, a.HRRDVACT, a.HRDEBUTACT, a.HRFINACT, a.NOMRESP, a.PRENOMRESP, 
+               an.NOMANIM, an.NBREPLACEANIM 
+        FROM ACTIVITE a 
+        JOIN ANIMATION an ON a.CODEANIM = an.CODEANIM 
+        WHERE a.CODEANIM = ? AND a.DATEACT = ?");
     $stmt->execute([$codeAnim, $dateAct]);
     $activite = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -163,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="codeEtatAct"><i class="fas fa-info-circle"></i> État de l'activité</label>
                             <select name="codeEtatAct" id="codeEtatAct" class="form-control">
                                 <?php
-                                $sql = "SELECT * FROM ETAT_ACT";
+                                $sql = "SELECT CODEETATACT, NOMETATACT FROM ETAT_ACT";
                                 $states = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
                                 foreach ($states as $state):
                                     ?>
