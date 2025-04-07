@@ -17,7 +17,9 @@ if (!isset($_GET['codeAnim'])) {
 $codeAnim = $_GET['codeAnim'];
 
 // Récupérer les informations actuelles de l'animation
-$sql = "SELECT * FROM ANIMATION WHERE CODEANIM = ?";
+$sql = "SELECT CODEANIM, NOMANIM, DESCRIPTANIM, CODETYPEANIM, DATEVALIDITEANIM, DUREEANIM, LIMITEAGE, TARIFANIM, 
+                NBREPLACEANIM, COMMENTANIM, DIFFICULTEANIM 
+        FROM ANIMATION WHERE CODEANIM = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$codeAnim]);
 $animation = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -70,7 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $successMessage = "L'animation a été mise à jour avec succès.";
     
     // Recharger les données après la mise à jour
-    $stmt = $pdo->prepare($sql = "SELECT * FROM ANIMATION WHERE CODEANIM = ?");
+    $stmt = $pdo->prepare($sql = "SELECT CODEANIM, NOMANIM, DESCRIPTANIM, CODETYPEANIM, DATEVALIDITEANIM, DUREEANIM, LIMITEAGE, TARIFANIM, 
+                NBREPLACEANIM, COMMENTANIM, DIFFICULTEANIM 
+        FROM ANIMATION WHERE CODEANIM = ?");
     $stmt->execute([$codeAnim]);
     $animation = $stmt->fetch(PDO::FETCH_ASSOC);
 }
